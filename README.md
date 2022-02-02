@@ -1,6 +1,6 @@
 # miab-dnsapi-proxy
 
-miab-dnsapi-proxy proxies DNS API update requests to the mailainabox DNS API.
+miab-dnsapi-proxy proxies DNS API update requests to the [mailainabox](https://github.com/mail-in-a-box/mailinabox) DNS API.
 
 Authorization takes place via a list of domains and host addresses allowed to update them for now.
 
