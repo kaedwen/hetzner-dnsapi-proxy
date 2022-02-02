@@ -165,7 +165,7 @@ func bindHttpReqData() gin.HandlerFunc {
 	}
 }
 
-func isSubdomain(subDomain, wildcardDomain string) bool {
+func isSubDomain(subDomain, wildcardDomain string) bool {
 	// Domain must be a wildcard domain
 	if wildcardDomain[0] != '*' {
 		return false
@@ -180,8 +180,9 @@ func isSubdomain(subDomain, wildcardDomain string) bool {
 	}
 
 	// Up to the asterisk all domain parts must match
+	subDomainPartsOffset := len(subDomainParts) - len(wildcardDomainParts)
 	for i := len(wildcardDomainParts) - 1; i > 0; i-- {
-		if wildcardDomainParts[i] != subDomainParts[i] {
+		if wildcardDomainParts[i] != subDomainParts[i+subDomainPartsOffset] {
 			return false
 		}
 	}
@@ -195,7 +196,7 @@ func (d *DnsUpdateController) checkPermissions() gin.HandlerFunc {
 		dnsRecord := c.MustGet(KEY_DNS_RECORD).(*DnsRecord)
 
 		for domain, ipNets := range d.config.AllowedDomains {
-			if dnsRecord.Name != domain && !isSubdomain(dnsRecord.Name, domain) {
+			if dnsRecord.Name != domain && !isSubDomain(dnsRecord.Name, domain) {
 				continue
 			}
 
