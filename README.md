@@ -4,6 +4,10 @@ miab-dnsapi-proxy proxies DNS API update requests to the [mailainabox](https://g
 
 Authorization takes place via a list of domains and host addresses allowed to update them for now.
 
+## Container image
+
+Get the container image from [Docker Hub](https://hub.docker.com/r/0xfelix/miab-dnsapi-proxy)
+
 ## TODO
 
 - More elaborate authentication / authorization mechanism
