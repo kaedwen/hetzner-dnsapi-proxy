@@ -96,7 +96,7 @@ func (d *Controller) do(record *data.DnsRecord) error {
 		return fmt.Errorf("could not find zone id for record %s", record.FullName)
 	}
 
-	rIds, err := d.getRecordIds(zId)
+	rIds, err := d.getRecordIds(zId, record.Type)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (d *Controller) getZoneIds() (map[string]string, error) {
 	return ids, nil
 }
 
-func (d *Controller) getRecordIds(zoneId string) (map[string]string, error) {
+func (d *Controller) getRecordIds(zoneId, recordType string) (map[string]string, error) {
 	res, err := d.getRequest(baseUrl + "/records?zone_id=" + zoneId)
 	if err != nil {
 		return nil, nil
@@ -194,7 +194,9 @@ func (d *Controller) getRecordIds(zoneId string) (map[string]string, error) {
 
 	ids := map[string]string{}
 	for _, record := range r.Records {
-		ids[record.Name] = record.Id
+		if record.Type == recordType {
+			ids[record.Name] = record.Id
+		}
 	}
 
 	return ids, nil
