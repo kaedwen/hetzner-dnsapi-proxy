@@ -12,7 +12,7 @@ COPY Makefile .
 COPY go.mod .
 COPY go.sum .
 COPY main.go .
-COPY pkg/ .
+COPY pkg/ pkg/
 
 RUN go mod download
 
