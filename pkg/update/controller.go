@@ -41,7 +41,6 @@ func NewController(cfg *config.Config) *Controller {
 
 func (d *Controller) CheckPermissions() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		allowed := false
 		record := c.MustGet(key.RECORD).(*data.DnsRecord)
 
 		for domain, ipNets := range d.cfg.AllowedDomains {
@@ -50,22 +49,15 @@ func (d *Controller) CheckPermissions() gin.HandlerFunc {
 			}
 
 			for _, ipNet := range ipNets {
-				clientIp := net.ParseIP(c.ClientIP())
-				if clientIp != nil && ipNet.Contains(clientIp) {
-					allowed = true
-					break
+				ip := net.ParseIP(c.ClientIP())
+				if ip != nil && ipNet.Contains(ip) {
+					return
 				}
 			}
-
-			if allowed {
-				break
-			}
 		}
 
-		if !allowed {
-			log.Printf("Client '%s' is not allowed to update '%s' data of '%s' to '%s'\n", c.ClientIP(), record.Type, record.FullName, record.Value)
-			c.AbortWithStatus(http.StatusForbidden)
-		}
+		log.Printf("Client '%s' is not allowed to update '%s' data of '%s' to '%s'\n", c.ClientIP(), record.Type, record.FullName, record.Value)
+		c.AbortWithStatus(http.StatusForbidden)
 	}
 }
 
