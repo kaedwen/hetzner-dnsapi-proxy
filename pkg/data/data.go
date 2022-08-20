@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	prefixAcmeChallenge = "_acme-challenge."
+	prefixAcmeChallenge = "_acme-challenge"
 	recordTypeA         = "A"
 	recordTypeTxt       = "TXT"
 )
@@ -68,7 +68,11 @@ func BindAcmeDns() gin.HandlerFunc {
 			return
 		}
 
-		data.FullName = prefixAcmeChallenge + data.FullName
+		// prepand prefix if not already given
+		if !strings.HasPrefix(data.FullName, prefixAcmeChallenge) {
+			data.FullName = fmt.Sprintf("%s.%s", prefixAcmeChallenge, data.FullName)
+		}
+
 		name, zone := splitFullName(data.FullName)
 		c.Set(key.RECORD, &DnsRecord{
 			FullName: data.FullName,
