@@ -68,7 +68,7 @@ func BindAcmeDns() gin.HandlerFunc {
 			return
 		}
 
-		// prepand prefix if not already given
+		// prepend prefix if not already given
 		if !strings.HasPrefix(data.FullName, prefixAcmeChallenge) {
 			data.FullName = fmt.Sprintf("%s.%s", prefixAcmeChallenge, data.FullName)
 		}
