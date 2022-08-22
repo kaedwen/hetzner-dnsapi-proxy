@@ -25,25 +25,25 @@ type DnsRecord struct {
 }
 
 type plainData struct {
-	FullName string `form:"hostname" binding:"required"`
-	Value    string `form:"ip" binding:"required"`
+	FullName string `form:"hostname" json:"hostname" binding:"required"`
+	Value    string `form:"ip" json:"ip" binding:"required"`
 }
 
 type acmeDnsData struct {
-	FullName string `json:"subdomain" binding:"required"`
-	Value    string `json:"txt" binding:"required"`
+	FullName string `form:"subdomain" json:"subdomain" binding:"required"`
+	Value    string `form:"txt" json:"txt" binding:"required"`
 }
 
 type httpReqData struct {
-	FullName string `json:"fqdn" binding:"required"`
-	Value    string `json:"value" binding:"required"`
+	FullName string `form:"fqdn" json:"fqdn" binding:"required"`
+	Value    string `form:"value" json:"value" binding:"required"`
 }
 
 func BindPlain() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		data := plainData{}
 
-		if err := c.BindQuery(&data); err != nil {
+		if err := c.Bind(&data); err != nil {
 			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -63,7 +63,7 @@ func BindAcmeDns() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		data := acmeDnsData{}
 
-		if err := c.BindJSON(&data); err != nil {
+		if err := c.Bind(&data); err != nil {
 			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -84,7 +84,7 @@ func BindHttpReq() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		data := httpReqData{}
 
-		if err := c.BindJSON(&data); err != nil {
+		if err := c.Bind(&data); err != nil {
 			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
