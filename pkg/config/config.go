@@ -13,6 +13,7 @@ type Config struct {
 	RecordTTL      int            `env:"RECORD_TTL" envDefault:"60"`
 	ListenAddr     string         `env:"LISTEN_ADDR" envDefault:":8081"`
 	TrustedProxies []string       `env:"TRUSTED_PROXIES" envDefault:""`
+	Debug          bool           `env:"DEBUG" envDefault:"false"`
 }
 
 type AllowedDomains map[string][]*net.IPNet

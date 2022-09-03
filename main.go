@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -60,11 +62,30 @@ func main() {
 	}
 
 	c := update.NewController(cfg)
-	r.GET("/plain/update", data.BindPlain(), c.CheckPermissions(), c.UpdateDns(), status.Ok)
-	r.POST("/acmedns/update", data.BindAcmeDns(), c.CheckPermissions(), c.UpdateDns(), status.OkAcmeDns)
-	r.POST("/httpreq/present", data.BindHttpReq(), c.CheckPermissions(), c.UpdateDns(), status.Ok)
-	r.POST("/httpreq/cleanup", status.Ok)
+	r.GET("/plain/update", buildChain(cfg, data.BindPlain(), c.CheckPermissions(), c.UpdateDns(), status.Ok)...)
+	r.POST("/acmedns/update", buildChain(cfg, data.BindAcmeDns(), c.CheckPermissions(), c.UpdateDns(), status.OkAcmeDns)...)
+	r.POST("/acmedns/register", buildChain(cfg, status.Ok)...)
+	r.POST("/httpreq/present", buildChain(cfg, data.BindHttpReq(), c.CheckPermissions(), c.UpdateDns(), status.Ok)...)
+	r.POST("/httpreq/cleanup", buildChain(cfg, status.Ok)...)
 
 	log.Printf("Starting hetzner-dnsapi-proxy, listening on %s\n", cfg.ListenAddr)
 	startServer(cfg.ListenAddr, r)
+}
+
+func buildChain(cfg *config.Config, handlers ...gin.HandlerFunc) gin.HandlersChain {
+	if cfg.Debug {
+		handlers = append([]gin.HandlerFunc{RequestLoggerMiddleware()}, handlers...)
+	}
+	return handlers
+}
+
+func RequestLoggerMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var buf bytes.Buffer
+		body, _ := io.ReadAll(io.TeeReader(c.Request.Body, &buf))
+		c.Request.Body = io.NopCloser(&buf)
+		log.Printf("BODY %s", string(body))
+		log.Printf("HEADER %+v", c.Request.Header)
+		c.Next()
+	}
 }
