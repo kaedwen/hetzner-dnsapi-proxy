@@ -42,14 +42,14 @@ func NewController(cfg *config.Config) *Controller {
 func (d *Controller) CheckPermissions() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		record := c.MustGet(key.RECORD).(*data.DnsRecord)
+		ip := net.ParseIP(c.ClientIP())
 
 		for domain, ipNets := range d.cfg.AllowedDomains {
-			if record.FullName != domain && !isSubDomain(record.FullName, domain) {
+			if record.Domain != domain && !isSubDomain(record.FullName, domain) {
 				continue
 			}
 
 			for _, ipNet := range ipNets {
-				ip := net.ParseIP(c.ClientIP())
 				if ip != nil && ipNet.Contains(ip) {
 					return
 				}
@@ -66,9 +66,13 @@ func (d *Controller) UpdateDns() gin.HandlerFunc {
 		record := c.MustGet(key.RECORD).(*data.DnsRecord)
 		log.Printf("Received request to update '%s' data of '%s' to '%s'\n", record.Type, record.FullName, record.Value)
 
-		if err := d.do(record); err != nil {
-			log.Printf("Update failed: %v", err)
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+		if d.cfg.DryRun {
+			log.Printf("Update skipped")
+		} else {
+			if err := d.do(record); err != nil {
+				log.Printf("Update failed: %v", err)
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+			}
 		}
 	}
 }
