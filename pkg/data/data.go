@@ -30,8 +30,8 @@ type plainData struct {
 }
 
 type acmeDnsData struct {
-	FullName string `form:"subdomain" json:"subdomain" binding:"required"`
-	Value    string `form:"txt" json:"txt" binding:"required"`
+	FullName string `json:"subdomain" binding:"required"`
+	Value    string `json:"txt" binding:"required"`
 }
 
 type httpReqData struct {
@@ -63,7 +63,7 @@ func BindAcmeDns() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		data := acmeDnsData{}
 
-		if err := c.Bind(&data); err != nil {
+		if err := c.BindJSON(&data); err != nil {
 			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
