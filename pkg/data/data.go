@@ -17,6 +17,7 @@ const (
 )
 
 type DnsRecord struct {
+	Domain   string
 	FullName string
 	Name     string
 	Zone     string
@@ -50,6 +51,7 @@ func BindPlain() gin.HandlerFunc {
 
 		name, zone := splitFullName(data.FullName)
 		c.Set(key.RECORD, &DnsRecord{
+			Domain:   data.FullName,
 			FullName: data.FullName,
 			Name:     name,
 			Zone:     zone,
@@ -68,10 +70,11 @@ func BindAcmeDns() gin.HandlerFunc {
 			return
 		}
 
-		data.FullName = prefixAcmeChallenge + data.FullName
-		name, zone := splitFullName(data.FullName)
+		fullName := prefixAcmeChallenge + data.FullName
+		name, zone := splitFullName(fullName)
 		c.Set(key.RECORD, &DnsRecord{
-			FullName: data.FullName,
+			Domain:   data.FullName,
+			FullName: fullName,
 			Name:     name,
 			Zone:     zone,
 			Value:    data.Value,
@@ -89,10 +92,11 @@ func BindHttpReq() gin.HandlerFunc {
 			return
 		}
 
-		data.FullName = strings.TrimRight(data.FullName, ".")
-		name, zone := splitFullName(data.FullName)
+		fullName := strings.TrimRight(data.FullName, ".")
+		name, zone := splitFullName(fullName)
 		c.Set(key.RECORD, &DnsRecord{
-			FullName: data.FullName,
+			Domain:   data.FullName,
+			FullName: fullName,
 			Name:     name,
 			Zone:     zone,
 			Value:    data.Value,
