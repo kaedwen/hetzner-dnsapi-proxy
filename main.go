@@ -17,7 +17,7 @@ import (
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/status"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/update"
 
-	"github.com/caarlos0/env/v6"
+	"github.com/caarlos0/env/v8"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,17 +38,15 @@ func startServer(listenAddr string, r *gin.Engine) {
 	<-quit
 	log.Println("Shutting down hetzner-dnsapi-proxy")
 
-	c, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	c, cancel := context.WithTimeout(context.Background(), shutdownTimeout*time.Second)
 	defer cancel()
 
-	if err := s.Shutdown(c); err != nil {
-		log.Fatal("Forcing shutdown:", err)
-	}
+	return s.Shutdown(c)
 }
 
 func main() {
 	cfg := &config.Config{}
-	if err := env.Parse(cfg, env.Options{RequiredIfNoDef: true}); err != nil {
+	if err := env.ParseWithOptions(cfg, env.Options{RequiredIfNoDef: true}); err != nil {
 		log.Fatal(err)
 	}
 
