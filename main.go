@@ -21,10 +21,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func startServer(listenAddr string, r *gin.Engine) {
+const (
+	readHeaderTimeout = 10
+	shutdownTimeout   = 5
+)
+
+func runServer(listenAddr string, r *gin.Engine) error {
 	s := &http.Server{
-		Addr:    listenAddr,
-		Handler: r,
+		Addr:              listenAddr,
+		Handler:           r,
+		ReadHeaderTimeout: readHeaderTimeout * time.Second,
 	}
 
 	go func() {
@@ -60,14 +66,16 @@ func main() {
 	}
 
 	c := update.NewController(cfg)
-	r.GET("/plain/update", buildChain(cfg, data.BindPlain(), c.CheckPermissions(), c.UpdateDns(), status.Ok)...)
-	r.POST("/acmedns/update", buildChain(cfg, data.BindAcmeDns(), c.CheckPermissions(), c.UpdateDns(), status.OkAcmeDns)...)
+	r.GET("/plain/update", buildChain(cfg, data.BindPlain(), c.CheckPermissions(), c.UpdateDNS(), status.Ok)...)
+	r.POST("/acmedns/update", buildChain(cfg, data.BindAcmeDNS(), c.CheckPermissions(), c.UpdateDNS(), status.OkAcmeDNS)...)
 	r.POST("/acmedns/register", buildChain(cfg, status.Ok)...)
-	r.POST("/httpreq/present", buildChain(cfg, data.BindHttpReq(), c.CheckPermissions(), c.UpdateDns(), status.Ok)...)
+	r.POST("/httpreq/present", buildChain(cfg, data.BindHTTPReq(), c.CheckPermissions(), c.UpdateDNS(), status.Ok)...)
 	r.POST("/httpreq/cleanup", buildChain(cfg, status.Ok)...)
 
 	log.Printf("Starting hetzner-dnsapi-proxy, listening on %s\n", cfg.ListenAddr)
-	startServer(cfg.ListenAddr, r)
+	if err := runServer(cfg.ListenAddr, r); err != nil {
+		log.Fatal("Error running server:", err)
+	}
 }
 
 func buildChain(cfg *config.Config, handlers ...gin.HandlerFunc) gin.HandlersChain {

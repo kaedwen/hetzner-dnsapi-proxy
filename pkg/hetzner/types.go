@@ -1,7 +1,7 @@
 package hetzner
 
 type Zone struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -10,12 +10,12 @@ type Zones struct {
 }
 
 type Record struct {
-	Id     string `json:"id,omitempty"`
+	ID     string `json:"id,omitempty"`
 	Name   string `json:"name"`
 	TTL    int    `json:"ttl"`
 	Type   string `json:"type"`
 	Value  string `json:"value"`
-	ZoneId string `json:"zone_id"`
+	ZoneID string `json:"zone_id"`
 }
 
 type Records struct {

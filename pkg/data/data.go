@@ -5,18 +5,18 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/key"
-
 	"github.com/gin-gonic/gin"
 )
 
 const (
+	KeyRecord = "KeyRecord"
+
 	prefixAcmeChallenge = "_acme-challenge"
 	recordTypeA         = "A"
 	recordTypeTxt       = "TXT"
 )
 
-type DnsRecord struct {
+type DNSRecord struct {
 	FullName string
 	Name     string
 	Zone     string
@@ -29,7 +29,7 @@ type plainData struct {
 	Value    string `form:"ip" json:"ip" binding:"required"`
 }
 
-type acmeDnsData struct {
+type acmeDNSData struct {
 	FullName string `json:"subdomain" binding:"required"`
 	Value    string `json:"txt" binding:"required"`
 }
@@ -49,7 +49,7 @@ func BindPlain() gin.HandlerFunc {
 		}
 
 		name, zone := splitFullName(data.FullName)
-		c.Set(key.RECORD, &DnsRecord{
+		c.Set(KeyRecord, &DNSRecord{
 			FullName: data.FullName,
 			Name:     name,
 			Zone:     zone,
@@ -59,9 +59,9 @@ func BindPlain() gin.HandlerFunc {
 	}
 }
 
-func BindAcmeDns() gin.HandlerFunc {
+func BindAcmeDNS() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		data := acmeDnsData{}
+		data := acmeDNSData{}
 
 		if err := c.BindJSON(&data); err != nil {
 			_ = c.AbortWithError(http.StatusBadRequest, err)
@@ -74,7 +74,7 @@ func BindAcmeDns() gin.HandlerFunc {
 		}
 
 		name, zone := splitFullName(data.FullName)
-		c.Set(key.RECORD, &DnsRecord{
+		c.Set(KeyRecord, &DNSRecord{
 			FullName: data.FullName,
 			Name:     name,
 			Zone:     zone,
@@ -84,7 +84,7 @@ func BindAcmeDns() gin.HandlerFunc {
 	}
 }
 
-func BindHttpReq() gin.HandlerFunc {
+func BindHTTPReq() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		data := httpReqData{}
 
@@ -95,7 +95,7 @@ func BindHttpReq() gin.HandlerFunc {
 
 		data.FullName = strings.TrimRight(data.FullName, ".")
 		name, zone := splitFullName(data.FullName)
-		c.Set(key.RECORD, &DnsRecord{
+		c.Set(KeyRecord, &DNSRecord{
 			FullName: data.FullName,
 			Name:     name,
 			Zone:     zone,
@@ -105,7 +105,7 @@ func BindHttpReq() gin.HandlerFunc {
 	}
 }
 
-func splitFullName(n string) (name string, zone string) {
+func splitFullName(n string) (name, zone string) {
 	parts := strings.Split(n, ".")
 	length := len(parts)
 

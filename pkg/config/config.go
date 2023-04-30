@@ -19,22 +19,22 @@ type Config struct {
 type AllowedDomains map[string][]*net.IPNet
 
 func (out *AllowedDomains) UnmarshalText(text []byte) error {
+	const expectedPartsCount = 2
+
 	allowedDomains := AllowedDomains{}
+	for _, part := range strings.Split(string(text), ";") {
+		partSplit := strings.Split(part, ",")
 
-	parts := strings.Split(string(text), ";")
-	for _, part := range parts {
-		allowedParts := strings.Split(part, ",")
-
-		if len(allowedParts) != 2 {
+		if len(partSplit) != expectedPartsCount {
 			return errors.New("failed to parse allowed domain, length of parts != 2")
 		}
 
-		_, ipv4Net, err := net.ParseCIDR(allowedParts[1])
+		_, ipv4Net, err := net.ParseCIDR(partSplit[1])
 		if err != nil {
 			return err
 		}
 
-		allowedDomains[allowedParts[0]] = append(allowedDomains[allowedParts[0]], ipv4Net)
+		allowedDomains[partSplit[0]] = append(allowedDomains[partSplit[0]], ipv4Net)
 	}
 
 	*out = allowedDomains
