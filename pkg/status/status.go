@@ -3,8 +3,10 @@ package status
 import (
 	"net/http"
 
-	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/data"
 	"github.com/gin-gonic/gin"
+
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/common"
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/data"
 )
 
 func Ok(c *gin.Context) {
@@ -14,4 +16,8 @@ func Ok(c *gin.Context) {
 func OkAcmeDNS(c *gin.Context) {
 	record := c.MustGet(data.KeyRecord).(*data.DNSRecord)
 	c.JSON(http.StatusOK, gin.H{"txt": record.Value})
+}
+
+func OkDirectAdmin(c *gin.Context) {
+	common.StatusOkDirectAdmin(c)
 }

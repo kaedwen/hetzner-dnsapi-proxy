@@ -13,10 +13,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/data"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/hetzner"
-	"github.com/gin-gonic/gin"
 )
 
 const (

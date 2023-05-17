@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/common"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
 )
 
@@ -128,7 +129,7 @@ func ShowDomainsDirectAdmin(allowedDomains config.AllowedDomains) gin.HandlerFun
 			values.Add("list", domain)
 		}
 
-		c.Data(http.StatusOK, "application/x-www-form-urlencoded", []byte(values.Encode()))
+		c.Data(http.StatusOK, common.ContentTypeURLEncoded, []byte(values.Encode()))
 	}
 }
 
@@ -142,7 +143,8 @@ func BindDirectAdmin() gin.HandlerFunc {
 		}
 
 		if data.Action != "add" {
-			c.AbortWithStatus(http.StatusOK)
+			c.Abort()
+			common.StatusOkDirectAdmin(c)
 			return
 		}
 

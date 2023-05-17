@@ -12,13 +12,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/caarlos0/env/v8"
+	"github.com/gin-gonic/gin"
+
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/data"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/status"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/update"
-
-	"github.com/caarlos0/env/v8"
-	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -71,8 +71,9 @@ func main() {
 	r.POST("/acmedns/register", buildChain(cfg, status.Ok)...)
 	r.POST("/httpreq/present", buildChain(cfg, data.BindHTTPReq(), c.CheckPermissions(), c.UpdateDNS(), status.Ok)...)
 	r.POST("/httpreq/cleanup", buildChain(cfg, status.Ok)...)
-	r.GET("/directadmin/CMD_API_SHOW_DOMAINS", buildChain(cfg, data.ShowDomainsDirectAdmin(cfg.AllowedDomains), status.Ok)...)
-	r.GET("/directadmin/CMD_API_DNS_CONTROL", buildChain(cfg, data.BindDirectAdmin(), c.CheckPermissions(), c.UpdateDNS(), status.Ok)...)
+	r.GET("/directadmin/CMD_API_SHOW_DOMAINS", buildChain(cfg, data.ShowDomainsDirectAdmin(cfg.AllowedDomains))...)
+	r.GET("/directadmin/CMD_API_DNS_CONTROL",
+		buildChain(cfg, data.BindDirectAdmin(), c.CheckPermissions(), c.UpdateDNS(), status.OkDirectAdmin)...)
 
 	log.Printf("Starting hetzner-dnsapi-proxy, listening on %s\n", cfg.ListenAddr)
 	if err := runServer(cfg.ListenAddr, r); err != nil {
