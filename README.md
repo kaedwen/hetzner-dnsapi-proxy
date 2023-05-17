@@ -15,11 +15,12 @@ Get the container image from [Docker Hub](https://hub.docker.com/r/0xfelix/hetzn
 
 ## Supported DNS APIs
 
-| API               | Endpoint                                                                                                                          |
-|-------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| lego HTTP request | POST `/httpreq/present`<br>POST `/httpreq/cleanup` (always returns `200 OK`)<br>(see https://go-acme.github.io/lego/dns/httpreq/) |
-| ACMEDNS           | POST `/acmedns/update`<br>(see https://github.com/joohoi/acme-dns#update-endpoint)                                                |
-| plain HTTP        | GET `/plain/update` (query params `hostname` and `ip`)                                                                            |
+| API               | Endpoint                                                                                                                                                                                                                                             |
+|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| lego HTTP request | POST `/httpreq/present`<br>POST `/httpreq/cleanup` (always returns `200 OK`)<br>(see https://go-acme.github.io/lego/dns/httpreq/)                                                                                                                    |
+| ACMEDNS           | POST `/acmedns/update`<br>(see https://github.com/joohoi/acme-dns#update-endpoint)                                                                                                                                                                   |
+| DirectAdmin       | GET `/directadmin/CMD_API_SHOW_DOMAINS`<br>GET `/directadmin/CMD_API_DNS_CONTROL` (only adding TXT records, everything else always return `200 OK`)<br>(see https://www.directadmin.com/api.php and https://www.directadmin.com/features.php?id=504) |
+| plain HTTP        | GET `/plain/update` (query params `hostname` and `ip`)                                                                                                                                                                                               |
 
 ## Environment variables
 

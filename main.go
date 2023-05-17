@@ -71,6 +71,8 @@ func main() {
 	r.POST("/acmedns/register", buildChain(cfg, status.Ok)...)
 	r.POST("/httpreq/present", buildChain(cfg, data.BindHTTPReq(), c.CheckPermissions(), c.UpdateDNS(), status.Ok)...)
 	r.POST("/httpreq/cleanup", buildChain(cfg, status.Ok)...)
+	r.GET("/directadmin/CMD_API_SHOW_DOMAINS", buildChain(cfg, data.ShowDomainsDirectAdmin(cfg.AllowedDomains), status.Ok)...)
+	r.GET("/directadmin/CMD_API_DNS_CONTROL", buildChain(cfg, data.BindDirectAdmin(), c.CheckPermissions(), c.UpdateDNS(), status.Ok)...)
 
 	log.Printf("Starting hetzner-dnsapi-proxy, listening on %s\n", cfg.ListenAddr)
 	if err := runServer(cfg.ListenAddr, r); err != nil {

@@ -3,9 +3,12 @@ package data
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
 )
 
 const (
@@ -37,6 +40,14 @@ type acmeDNSData struct {
 type httpReqData struct {
 	FullName string `form:"fqdn" json:"fqdn" binding:"required"`
 	Value    string `form:"value" json:"value" binding:"required"`
+}
+
+type directAdminData struct {
+	Domain string `form:"domain" binding:"required"`
+	Action string `form:"action" binding:"required"`
+	Type   string `form:"type"`
+	Name   string `form:"name"`
+	Value  string `form:"value"`
 }
 
 func BindPlain() gin.HandlerFunc {
@@ -97,6 +108,59 @@ func BindHTTPReq() gin.HandlerFunc {
 		name, zone := splitFullName(data.FullName)
 		c.Set(KeyRecord, &DNSRecord{
 			FullName: data.FullName,
+			Name:     name,
+			Zone:     zone,
+			Value:    data.Value,
+			Type:     recordTypeTxt,
+		})
+	}
+}
+
+func ShowDomainsDirectAdmin(allowedDomains config.AllowedDomains) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		domains := map[string]struct{}{}
+		for domain := range allowedDomains {
+			domains[strings.TrimPrefix(domain, "*.")] = struct{}{}
+		}
+
+		values := url.Values{}
+		for domain := range domains {
+			values.Add("list", domain)
+		}
+
+		c.Data(http.StatusOK, "application/x-www-form-urlencoded", []byte(values.Encode()))
+	}
+}
+
+func BindDirectAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		data := directAdminData{}
+
+		if err := c.Bind(&data); err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		if data.Action != "add" {
+			c.AbortWithStatus(http.StatusOK)
+			return
+		}
+
+		if data.Type != recordTypeTxt {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		fullName := ""
+		if data.Name != "" {
+			fullName = data.Name + "." + data.Domain
+		} else {
+			fullName = data.Domain
+		}
+
+		name, zone := splitFullName(fullName)
+		c.Set(KeyRecord, &DNSRecord{
+			FullName: fullName,
 			Name:     name,
 			Zone:     zone,
 			Value:    data.Value,
