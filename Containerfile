@@ -13,8 +13,7 @@ COPY go.mod .
 COPY go.sum .
 COPY main.go .
 COPY pkg/ pkg/
-
-RUN go mod download
+COPY vendor/ vendor/
 
 RUN make build
 
@@ -24,7 +23,7 @@ FROM scratch
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /workspace/hetzner-dnsapi-proxy /
+COPY --from=builder /workspace/bin/hetzner-dnsapi-proxy /
 
 USER hetzner-dnsapi-proxy
 EXPOSE 8081
