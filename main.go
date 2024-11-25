@@ -84,12 +84,12 @@ func main() {
 
 func buildChain(cfg *config.Config, handlers ...gin.HandlerFunc) gin.HandlersChain {
 	if cfg.Debug {
-		handlers = append([]gin.HandlerFunc{RequestLoggerMiddleware()}, handlers...)
+		handlers = append([]gin.HandlerFunc{requestLoggerMiddleware()}, handlers...)
 	}
 	return handlers
 }
 
-func RequestLoggerMiddleware() gin.HandlerFunc {
+func requestLoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var buf bytes.Buffer
 		body, _ := io.ReadAll(io.TeeReader(c.Request.Body, &buf))
