@@ -6,7 +6,7 @@ Authorization takes place via a list of domains and host addresses allowed to up
 
 ## Container image
 
-Get the container image from [Docker Hub](https://hub.docker.com/r/0xfelix/hetzner-dnsapi-proxy)
+Get the container image from [ghcr.io](https://github.com/0xFelix/hetzner-dnsapi-proxy/pkgs/container/hetzner-dnsapi-proxy)
 
 ## TODO
 
