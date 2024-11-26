@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build_and_push:
@@ -12,20 +11,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Get IMAGE_ID
+        run: |
+          echo "IMAGE_ID=$(echo ghcr.io/${{ github.repository }} | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
+      - name: Get SHORT_SHA
+        run: |
+          echo "SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_ENV
       - name: Install podman
         run: |
           sudo apt-get update
           sudo apt-get install -y podman
-      - name: Get image id
-        run: echo "IMAGE_ID=$(echo ghcr.io/${{ github.repository }} | tr '[A-Z]' '[a-z]')" >> $GITHUB_ENV
-      - name: Get short commit SHA
-        run: echo "SHORT_SHA=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_ENV
-      - name: Build container image
-        run: |
-          podman build -t ${{ env.IMAGE_ID }}:${{ env.SHORT_SHA }} -t ${{ env.IMAGE_ID }}:latest .
       - name: Login to ghcr.io
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | podman login ghcr.io --username ${{ github.actor }} --password-stdin
+      - name: Build container image
+        run: |
+          podman build -t ${{ env.IMAGE_ID }}:${{ env.SHORT_SHA }} -t ${{ env.IMAGE_ID }}:latest .
       - name: Push container image
         run: |
           podman push ${{ env.IMAGE_ID }}:${{ env.SHORT_SHA }}
