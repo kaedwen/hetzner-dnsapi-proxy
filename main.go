@@ -23,7 +23,7 @@ func main() {
 		cfg *config.Config
 		err error
 	)
-	if *configFile == "" {
+	if *configFile != "" {
 		log.Printf("Reading config file: %s", *configFile)
 		cfg, err = config.ReadFile(*configFile)
 	} else {
