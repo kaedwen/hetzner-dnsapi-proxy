@@ -255,7 +255,7 @@ var _ = Describe("Config", func() {
 			Expect(cfgRead).To(Equal(cfg))
 		})
 
-		FIt("should set default ip mask", func() {
+		It("should set default ip mask", func() {
 			cfg := &config.Config{
 				Token: apiToken,
 				Auth: config.Auth{
