@@ -36,6 +36,7 @@ func BindPlain(next http.Handler) http.Handler {
 			return
 		}
 
+		username, password, _ := r.BasicAuth()
 		next.ServeHTTP(w, r.WithContext(
 			newContextWithReqData(r.Context(),
 				&ReqData{
@@ -44,8 +45,8 @@ func BindPlain(next http.Handler) http.Handler {
 					Zone:     zone,
 					Value:    ip,
 					Type:     recordTypeA,
-					Username: r.Form.Get("username"),
-					Password: r.Form.Get("password"),
+					Username: username,
+					Password: password,
 				},
 			)),
 		)

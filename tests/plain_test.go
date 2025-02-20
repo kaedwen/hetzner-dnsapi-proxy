@@ -45,11 +45,9 @@ var _ = Describe("Plain", func() {
 				libapi.PostRecord(token, libapi.NewARecord()),
 			)
 
-			Expect(doPlainRequest(ctx, server.URL+"/plain/update", url.Values{
+			Expect(doPlainRequest(ctx, server.URL+"/plain/update", username, password, url.Values{
 				"hostname": []string{libapi.ARecordNameFull},
 				"ip":       []string{libapi.AUpdated},
-				"username": []string{username},
-				"password": []string{password},
 			})).To(Equal(http.StatusOK))
 		})
 
@@ -60,11 +58,9 @@ var _ = Describe("Plain", func() {
 				libapi.PutRecord(token, libapi.UpdatedARecord()),
 			)
 
-			Expect(doPlainRequest(ctx, server.URL+"/plain/update", url.Values{
+			Expect(doPlainRequest(ctx, server.URL+"/plain/update", username, password, url.Values{
 				"hostname": []string{libapi.ARecordNameFull},
 				"ip":       []string{libapi.AUpdated},
-				"username": []string{username},
-				"password": []string{password},
 			})).To(Equal(http.StatusOK))
 		})
 	})
@@ -75,46 +71,39 @@ var _ = Describe("Plain", func() {
 		})
 
 		It("when hostname is missing", func(ctx context.Context) {
-			Expect(doPlainRequest(ctx, server.URL+"/plain/update", url.Values{
-				"ip":       []string{libapi.AUpdated},
-				"username": []string{username},
-				"password": []string{password},
+			Expect(doPlainRequest(ctx, server.URL+"/plain/update", username, password, url.Values{
+				"ip": []string{libapi.AUpdated},
 			})).To(Equal(http.StatusBadRequest))
 		})
 
 		It("when ip is missing", func(ctx context.Context) {
-			Expect(doPlainRequest(ctx, server.URL+"/plain/update", url.Values{
+			Expect(doPlainRequest(ctx, server.URL+"/plain/update", username, password, url.Values{
 				"hostname": []string{libapi.ARecordNameFull},
-				"username": []string{username},
-				"password": []string{password},
 			})).To(Equal(http.StatusBadRequest))
 		})
 
 		It("when hostname is malformed", func(ctx context.Context) {
-			Expect(doPlainRequest(ctx, server.URL+"/plain/update", url.Values{
+			Expect(doPlainRequest(ctx, server.URL+"/plain/update", username, password, url.Values{
 				"hostname": []string{libapi.TLD},
 				"ip":       []string{libapi.AUpdated},
-				"username": []string{username},
-				"password": []string{password},
 			})).To(Equal(http.StatusBadRequest))
 		})
 
 		It("when access is denied", func(ctx context.Context) {
 			server = libserver.NewNoAllowedDomains(api.URL())
-			Expect(doPlainRequest(ctx, server.URL+"/plain/update", url.Values{
+			Expect(doPlainRequest(ctx, server.URL+"/plain/update", username, password, url.Values{
 				"hostname": []string{libapi.ARecordNameFull},
 				"ip":       []string{libapi.AUpdated},
-				"username": []string{username},
-				"password": []string{password},
 			})).To(Equal(http.StatusForbidden))
 		})
 	})
 })
 
-func doPlainRequest(ctx context.Context, serverURL string, data url.Values) int {
+func doPlainRequest(ctx context.Context, serverURL, username, password string, data url.Values) int {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, serverURL, http.NoBody)
 	Expect(err).ToNot(HaveOccurred())
 	req.URL.RawQuery = data.Encode()
+	req.SetBasicAuth(username, password)
 
 	c := &http.Client{}
 	res, err := c.Do(req)
