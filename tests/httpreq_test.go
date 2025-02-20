@@ -120,7 +120,7 @@ var _ = Describe("HTTPReq", func() {
 						"fqdn":  fqdn,
 						"value": libapi.TXTUpdated,
 					},
-				)).To(Equal(http.StatusForbidden))
+				)).To(Equal(http.StatusUnauthorized))
 			},
 				Entry("with dot suffix", libapi.TXTRecordNameFull+"."),
 				Entry("without dot suffix", libapi.TXTRecordNameFull),

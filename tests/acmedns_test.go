@@ -136,7 +136,7 @@ var _ = Describe("AcmeDNS", func() {
 					"txt":       libapi.TXTUpdated,
 				},
 			)
-			Expect(statusCode).To(Equal(http.StatusForbidden))
+			Expect(statusCode).To(Equal(http.StatusUnauthorized))
 			Expect(resBody).To(BeEmpty())
 		},
 			Entry("with prefix", libapi.TXTRecordNameFull),

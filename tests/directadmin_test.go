@@ -218,7 +218,7 @@ var _ = Describe("DirectAdmin", func() {
 						"value":  []string{"something"},
 					},
 				)
-				Expect(statusCode).To(Equal(http.StatusForbidden))
+				Expect(statusCode).To(Equal(http.StatusUnauthorized))
 				Expect(resData).To(BeEmpty())
 			},
 				Entry("A record with fqdn in domain", libapi.ARecordNameFull, "", libapi.RecordTypeA),

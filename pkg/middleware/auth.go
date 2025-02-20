@@ -23,7 +23,7 @@ func NewAuthorizer(cfg *config.Config) func(http.Handler) http.Handler {
 			if !CheckPermission(cfg, data, r.RemoteAddr) {
 				log.Printf("client '%s' is not allowed to update '%s' data of '%s' to '%s'",
 					r.RemoteAddr, data.Type, data.FullName, data.Value)
-				w.WriteHeader(http.StatusForbidden)
+				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 

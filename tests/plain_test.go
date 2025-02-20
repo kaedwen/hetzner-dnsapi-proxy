@@ -94,7 +94,7 @@ var _ = Describe("Plain", func() {
 			Expect(doPlainRequest(ctx, server.URL+"/plain/update", username, password, url.Values{
 				"hostname": []string{libapi.ARecordNameFull},
 				"ip":       []string{libapi.AUpdated},
-			})).To(Equal(http.StatusForbidden))
+			})).To(Equal(http.StatusUnauthorized))
 		})
 	})
 })
