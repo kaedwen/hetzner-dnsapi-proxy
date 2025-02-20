@@ -11,7 +11,6 @@ import (
 const (
 	recordTypeA           = "A"
 	recordTypeTXT         = "TXT"
-	headerAuthorization   = "Authorization"
 	failedParseRequestFmt = "failed to parse request: %v"
 )
 

@@ -154,7 +154,7 @@ func doAcmeDNSRequest(ctx context.Context, url, username, password string, data 
 	req.Header.Add("X-Api-User", username)
 	req.Header.Add("X-Api-Key", password)
 
-	// Eplicitly set Content-Type to empty instead of application/json.
+	// Explicitly set Content-Type to empty instead of application/json.
 	// Some AcmeDNS clients do not provide this header.
 	req.Header.Add("Content-Type", "")
 

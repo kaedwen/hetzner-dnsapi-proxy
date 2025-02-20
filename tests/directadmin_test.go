@@ -72,7 +72,7 @@ var _ = Describe("DirectAdmin", func() {
 				libapi.ZoneName, libapi.ARecordName, libapi.RecordTypeA, libapi.AUpdated, libapi.NewARecord),
 			Entry("TXT record with fqdn in domain",
 				libapi.TXTRecordNameFull, "", libapi.RecordTypeTXT, libapi.TXTUpdated, libapi.NewTXTRecord),
-			Entry("TXT recordd with fqdn from name and domain",
+			Entry("TXT record with fqdn from name and domain",
 				libapi.ZoneName, libapi.TXTRecordName, libapi.RecordTypeTXT, libapi.TXTUpdated, libapi.NewTXTRecord),
 		)
 
@@ -103,7 +103,7 @@ var _ = Describe("DirectAdmin", func() {
 				libapi.ZoneName, libapi.ARecordName, libapi.RecordTypeA, libapi.AUpdated, libapi.UpdatedARecord),
 			Entry("TXT record with fqdn in domain",
 				libapi.TXTRecordNameFull, "", libapi.RecordTypeTXT, libapi.TXTUpdated, libapi.UpdatedTXTRecord),
-			Entry("TXT recordd with fqdn from name and domain",
+			Entry("TXT record with fqdn from name and domain",
 				libapi.ZoneName, libapi.TXTRecordName, libapi.RecordTypeTXT, libapi.TXTUpdated, libapi.UpdatedTXTRecord),
 		)
 	})
@@ -151,7 +151,7 @@ var _ = Describe("DirectAdmin", func() {
 		})
 
 		Context("should fail", func() {
-			const domanActionMissing = "domain or action is missing\n"
+			const domainActionMissing = "domain or action is missing\n"
 
 			It("when domain is missing", func(ctx context.Context) {
 				statusCode, resData := doDirectAdminRequest(ctx, server.URL+"/directadmin/CMD_API_DNS_CONTROL", username, password,
@@ -163,7 +163,7 @@ var _ = Describe("DirectAdmin", func() {
 					},
 				)
 				Expect(statusCode).To(Equal(http.StatusBadRequest))
-				Expect(resData).To(Equal(domanActionMissing))
+				Expect(resData).To(Equal(domainActionMissing))
 			})
 
 			It("when action is missing", func(ctx context.Context) {
@@ -176,7 +176,7 @@ var _ = Describe("DirectAdmin", func() {
 					},
 				)
 				Expect(statusCode).To(Equal(http.StatusBadRequest))
-				Expect(resData).To(Equal(domanActionMissing))
+				Expect(resData).To(Equal(domainActionMissing))
 			})
 
 			It("when type is not A or TXT", func(ctx context.Context) {
@@ -224,7 +224,7 @@ var _ = Describe("DirectAdmin", func() {
 				Entry("A record with fqdn in domain", libapi.ARecordNameFull, "", libapi.RecordTypeA),
 				Entry("A record with fqdn from name and domain", libapi.ZoneName, libapi.ARecordName, libapi.RecordTypeA),
 				Entry("TXT record with fqdn in domain", libapi.TXTRecordNameFull, "", libapi.RecordTypeTXT),
-				Entry("TXT recordd with fqdn from name and domain", libapi.ZoneName, libapi.TXTRecordName, libapi.RecordTypeTXT),
+				Entry("TXT record with fqdn from name and domain", libapi.ZoneName, libapi.TXTRecordName, libapi.RecordTypeTXT),
 			)
 		})
 	})
