@@ -255,6 +255,34 @@ var _ = Describe("Config", func() {
 			Expect(cfgRead).To(Equal(cfg))
 		})
 
+		FIt("should set default ip mask", func() {
+			cfg := &config.Config{
+				Token: apiToken,
+				Auth: config.Auth{
+					Method: config.AuthMethodAllowedDomains,
+					AllowedDomains: config.AllowedDomains{
+						"*": []*net.IPNet{
+							{
+								IP: net.IPv4(127, 0, 0, 1),
+							},
+						},
+					},
+					Users: users,
+				},
+			}
+
+			data, err := yaml.Marshal(cfg)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(os.WriteFile(filePath, data, 0o600)).To(Succeed())
+
+			cfgRead, err := config.ReadFile(filePath)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(cfgRead.Auth.AllowedDomains).To(HaveKeyWithValue("*", []*net.IPNet{{
+				IP:   net.IPv4(127, 0, 0, 1),
+				Mask: net.IPv4Mask(255, 255, 255, 255),
+			}}))
+		})
+
 		DescribeTable("should fail on ", func(cfgFn func() *config.Config, errMsg string) {
 			data, err := yaml.Marshal(cfgFn())
 			Expect(err).ToNot(HaveOccurred())

@@ -172,6 +172,8 @@ func ReadFile(path string) (*Config, error) {
 		return nil, errors.New("auth.allowedDomains or auth.users cannot both be empty with auth method any")
 	}
 
+	setDefaultIPMask(cfg.Auth.AllowedDomains)
+
 	return cfg, nil
 }
 
@@ -180,4 +182,15 @@ func AuthMethodIsValid(authMethod string) bool {
 		authMethod == AuthMethodUsers ||
 		authMethod == AuthMethodBoth ||
 		authMethod == AuthMethodAny
+}
+
+func setDefaultIPMask(allowedDomains AllowedDomains) {
+	const ff = 255
+	for _, allowedDomain := range allowedDomains {
+		for _, ipNet := range allowedDomain {
+			if len(ipNet.Mask) == 0 {
+				ipNet.Mask = net.IPv4Mask(ff, ff, ff, ff)
+			}
+		}
+	}
 }
