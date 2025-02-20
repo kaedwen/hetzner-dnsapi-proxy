@@ -29,7 +29,7 @@ func New(cfg *config.Config) http.Handler {
 	mux.Handle("GET /plain/update",
 		handle(cfg, middleware.BindPlain, authorizer, updater, middleware.StatusOk))
 	mux.Handle("POST /acmedns/update",
-		handle(cfg, middleware.ContentTypeJSON, middleware.BindAcmeDNS, authorizer, updater, middleware.StatusOkAcmeDNS))
+		handle(cfg, middleware.BindAcmeDNS, authorizer, updater, middleware.StatusOkAcmeDNS))
 	mux.Handle("POST /httpreq/present",
 		handle(cfg, middleware.ContentTypeJSON, middleware.BindHTTPReq, authorizer, updater, middleware.StatusOk))
 	mux.Handle("POST /httpreq/cleanup",
