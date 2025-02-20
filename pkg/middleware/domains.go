@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"log"
 	"maps"
 	"net"
@@ -15,15 +14,15 @@ import (
 func NewShowDomainsDirectAdmin(cfg *config.Config) func(http.Handler) http.Handler {
 	return func(_ http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			domains, err := GetDomains(cfg, r.RemoteAddr, r.Header.Get(headerAuthorization))
-			if err != nil {
-				log.Printf("%v", err)
-				w.WriteHeader(http.StatusUnauthorized)
+			if !config.AuthMethodIsValid(cfg.Auth.Method) {
+				log.Printf("invalid auth method: %s", cfg.Auth.Method)
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
+			username, password, _ := r.BasicAuth()
 			values := url.Values{}
-			for domain := range domains {
+			for domain := range GetDomains(cfg, r.RemoteAddr, username, password) {
 				values.Add("list", domain)
 			}
 
@@ -36,23 +35,15 @@ func NewShowDomainsDirectAdmin(cfg *config.Config) func(http.Handler) http.Handl
 	}
 }
 
-func GetDomains(cfg *config.Config, remoteAddr, authorization string) (map[string]struct{}, error) {
-	if !config.AuthMethodIsValid(cfg.Auth.Method) {
-		return nil, fmt.Errorf("invalid auth method: %s", cfg.Auth.Method)
-	}
-
+func GetDomains(cfg *config.Config, remoteAddr, username, password string) map[string]struct{} {
 	domainsAllowedDomains := getDomainsFromAllowedDomains(cfg.Auth.AllowedDomains, remoteAddr)
 	if cfg.Auth.Method == config.AuthMethodAllowedDomains {
-		return domainsAllowedDomains, nil
+		return domainsAllowedDomains
 	}
 
-	domainsUsers, err := getDomainsFromUsers(cfg.Auth.Users, authorization)
-	if err != nil &&
-		(cfg.Auth.Method == config.AuthMethodUsers || cfg.Auth.Method == config.AuthMethodBoth) {
-		return nil, err
-	}
+	domainsUsers := getDomainsFromUsers(cfg.Auth.Users, username, password)
 	if cfg.Auth.Method == config.AuthMethodUsers {
-		return domainsUsers, nil
+		return domainsUsers
 	}
 
 	domains := map[string]struct{}{}
@@ -67,7 +58,7 @@ func GetDomains(cfg *config.Config, remoteAddr, authorization string) (map[strin
 		maps.Copy(domains, domainsUsers)
 	}
 
-	return domains, nil
+	return domains
 }
 
 func getDomainsFromAllowedDomains(allowedDomains config.AllowedDomains, remoteAddr string) map[string]struct{} {
@@ -85,12 +76,7 @@ func getDomainsFromAllowedDomains(allowedDomains config.AllowedDomains, remoteAd
 	return domains
 }
 
-func getDomainsFromUsers(users []config.User, authorization string) (map[string]struct{}, error) {
-	username, password, err := DecodeBasicAuth(authorization)
-	if err != nil {
-		return nil, err
-	}
-
+func getDomainsFromUsers(users []config.User, username, password string) map[string]struct{} {
 	domains := map[string]struct{}{}
 	for _, user := range users {
 		if user.Username == username && user.Password == password {
@@ -101,5 +87,5 @@ func getDomainsFromUsers(users []config.User, authorization string) (map[string]
 		}
 	}
 
-	return domains, nil
+	return domains
 }

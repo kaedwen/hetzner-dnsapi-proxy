@@ -1,7 +1,6 @@
 package middleware_test
 
 import (
-	"encoding/base64"
 	"net"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -17,12 +16,6 @@ var _ = Describe("GetDomains", func() {
 		username   = "username"
 		password   = "password"
 	)
-
-	var authorization string
-
-	BeforeEach(func() {
-		authorization = "Basic " + base64.StdEncoding.EncodeToString([]byte(username+":"+password))
-	})
 
 	DescribeTable("should successfully return expected domains", func(authMethod string, expectedDomains map[string]struct{}) {
 		cfg := &config.Config{
@@ -56,9 +49,7 @@ var _ = Describe("GetDomains", func() {
 				},
 			},
 		}
-		domains, err := middleware.GetDomains(cfg, remoteAddr, authorization)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(domains).To(Equal(expectedDomains))
+		Expect(middleware.GetDomains(cfg, remoteAddr, username, password)).To(Equal(expectedDomains))
 	},
 		Entry("with auth method allowed domains",
 			config.AuthMethodAllowedDomains,
@@ -90,40 +81,34 @@ var _ = Describe("GetDomains", func() {
 		),
 	)
 
-	It("should fail if auth method is invalid", func() {
+	It("should return nothing if auth method is invalid", func() {
 		cfg := &config.Config{
 			Auth: config.Auth{
 				Method: "invalid",
 			},
 		}
-		domains, err := middleware.GetDomains(cfg, remoteAddr, authorization)
-		Expect(err).To(MatchError("invalid auth method: invalid"))
-		Expect(domains).To(BeEmpty())
+		Expect(middleware.GetDomains(cfg, remoteAddr, username, password)).To(BeEmpty())
 	})
 
-	DescribeTable("should not fail if basic auth is invalid and auth method is", func(authMethod string) {
+	DescribeTable("should return something if basic auth is invalid and auth method is", func(authMethod string) {
 		cfg := &config.Config{
 			Auth: config.Auth{
 				Method: authMethod,
 			},
 		}
-		domains, err := middleware.GetDomains(cfg, remoteAddr, "something")
-		Expect(err).ToNot(HaveOccurred())
-		Expect(domains).To(BeEmpty())
+		Expect(middleware.GetDomains(cfg, remoteAddr, "", "")).To(BeEmpty())
 	},
 		Entry("allowedDomains", config.AuthMethodAllowedDomains),
 		Entry("any", config.AuthMethodAny),
 	)
 
-	DescribeTable("should fail if basic auth is invalid and auth method is", func(authMethod string) {
+	DescribeTable("should return nothing if basic auth is invalid and auth method is", func(authMethod string) {
 		cfg := &config.Config{
 			Auth: config.Auth{
 				Method: authMethod,
 			},
 		}
-		domains, err := middleware.GetDomains(cfg, remoteAddr, "something")
-		Expect(err).To(MatchError("invalid authorization header: something"))
-		Expect(domains).To(BeEmpty())
+		Expect(middleware.GetDomains(cfg, remoteAddr, "", "")).To(BeEmpty())
 	},
 		Entry("users", config.AuthMethodUsers),
 		Entry("both", config.AuthMethodBoth),

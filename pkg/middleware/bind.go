@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -122,16 +121,7 @@ func BindHTTPReq(next http.Handler) http.Handler {
 			return
 		}
 
-		username := ""
-		password := ""
-		if authorization := r.Header.Get(headerAuthorization); authorization != "" {
-			if username, password, err = DecodeBasicAuth(r.Header.Get(headerAuthorization)); err != nil {
-				log.Printf("%v", err)
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-		}
-
+		username, password, _ := r.BasicAuth()
 		next.ServeHTTP(w, r.WithContext(
 			newContextWithReqData(r.Context(),
 				&ReqData{
@@ -185,16 +175,7 @@ func BindDirectAdmin(next http.Handler) http.Handler {
 			return
 		}
 
-		username := ""
-		password := ""
-		if authorization := r.Header.Get(headerAuthorization); authorization != "" {
-			if username, password, err = DecodeBasicAuth(r.Header.Get(headerAuthorization)); err != nil {
-				log.Printf("%v", err)
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-		}
-
+		username, password, _ := r.BasicAuth()
 		next.ServeHTTP(w, r.WithContext(
 			newContextWithReqData(r.Context(),
 				&ReqData{
@@ -224,29 +205,4 @@ func SplitFQDN(fqdn string) (name, zone string, err error) {
 	zone = strings.Join(parts[length-zoneParts:], ".")
 
 	return name, zone, nil
-}
-
-func DecodeBasicAuth(authorization string) (username, password string, err error) {
-	const expectedParts = 2
-
-	parts := strings.SplitN(authorization, " ", expectedParts)
-	if len(parts) != expectedParts {
-		return "", "", fmt.Errorf("invalid authorization header: %s", authorization)
-	}
-
-	if parts[0] != "Basic" {
-		return "", "", fmt.Errorf("invalid authorization method: %s", authorization)
-	}
-
-	payload, err := base64.StdEncoding.DecodeString(parts[1])
-	if err != nil {
-		return "", "", fmt.Errorf("invalid base64 value: %s", authorization)
-	}
-
-	pair := strings.SplitN(string(payload), ":", expectedParts)
-	if len(pair) != expectedParts {
-		return "", "", fmt.Errorf("invalid username and password: %s", authorization)
-	}
-
-	return pair[0], pair[1], nil
 }
