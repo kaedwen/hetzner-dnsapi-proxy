@@ -34,12 +34,16 @@ var _ = Describe("GetDomains", func() {
 						IP:   net.IPv4(127, 0, 0, 1),
 						Mask: net.IPv4Mask(255, 255, 255, 255),
 					}},
+					"*.parent.com": []*net.IPNet{{
+						IP:   net.IPv4(127, 0, 0, 1),
+						Mask: net.IPv4Mask(255, 255, 255, 255),
+					}},
 				},
 				Users: []config.User{
 					{
 						Username: username,
 						Password: password,
-						Domains:  []string{"something.com", "nice.com"},
+						Domains:  []string{"something.com", "nice.com", "sub.parent.com"},
 					},
 					{
 						Username: "someone",
@@ -56,27 +60,32 @@ var _ = Describe("GetDomains", func() {
 			map[string]struct{}{
 				"example.com": {},
 				"nice.com":    {},
+				"parent.com":  {},
 			},
 		),
 		Entry("with auth method users",
 			config.AuthMethodUsers,
 			map[string]struct{}{
-				"something.com": {},
-				"nice.com":      {},
+				"something.com":  {},
+				"nice.com":       {},
+				"sub.parent.com": {},
 			},
 		),
 		Entry("with auth method both",
 			config.AuthMethodBoth,
 			map[string]struct{}{
-				"nice.com": {},
+				"nice.com":       {},
+				"sub.parent.com": {},
 			},
 		),
 		Entry("with auth method any",
 			config.AuthMethodAny,
 			map[string]struct{}{
-				"example.com":   {},
-				"nice.com":      {},
-				"something.com": {},
+				"example.com":    {},
+				"nice.com":       {},
+				"something.com":  {},
+				"parent.com":     {},
+				"sub.parent.com": {},
 			},
 		),
 	)

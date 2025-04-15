@@ -38,12 +38,12 @@ func NewShowDomainsDirectAdmin(cfg *config.Config) func(http.Handler) http.Handl
 func GetDomains(cfg *config.Config, remoteAddr, username, password string) map[string]struct{} {
 	domainsAllowedDomains := getDomainsFromAllowedDomains(cfg.Auth.AllowedDomains, remoteAddr)
 	if cfg.Auth.Method == config.AuthMethodAllowedDomains {
-		return domainsAllowedDomains
+		return stripWildcards(domainsAllowedDomains)
 	}
 
 	domainsUsers := getDomainsFromUsers(cfg.Auth.Users, username, password)
 	if cfg.Auth.Method == config.AuthMethodUsers {
-		return domainsUsers
+		return stripWildcards(domainsUsers)
 	}
 
 	domains := map[string]struct{}{}
@@ -52,6 +52,12 @@ func GetDomains(cfg *config.Config, remoteAddr, username, password string) map[s
 		for domain := range domainsAllowedDomains {
 			if _, ok := domainsUsers[domain]; ok {
 				domains[domain] = struct{}{}
+				continue
+			}
+			for domainUser := range domainsUsers {
+				if IsSubDomain(domainUser, domain) {
+					domains[domainUser] = struct{}{}
+				}
 			}
 		}
 	case config.AuthMethodAny:
@@ -59,7 +65,7 @@ func GetDomains(cfg *config.Config, remoteAddr, username, password string) map[s
 		maps.Copy(domains, domainsUsers)
 	}
 
-	return domains
+	return stripWildcards(domains)
 }
 
 func getDomainsFromAllowedDomains(allowedDomains config.AllowedDomains, remoteAddr string) map[string]struct{} {
@@ -68,7 +74,7 @@ func getDomainsFromAllowedDomains(allowedDomains config.AllowedDomains, remoteAd
 		for _, ipNet := range ipNets {
 			ip := net.ParseIP(remoteAddr)
 			if ip != nil && ipNet.Contains(ip) {
-				domains[strings.TrimPrefix(domain, "*.")] = struct{}{}
+				domains[domain] = struct{}{}
 				break
 			}
 		}
@@ -82,11 +88,20 @@ func getDomainsFromUsers(users []config.User, username, password string) map[str
 	for _, user := range users {
 		if user.Username == username && user.Password == password {
 			for _, domain := range user.Domains {
-				domains[strings.TrimPrefix(domain, "*.")] = struct{}{}
+				domains[domain] = struct{}{}
 			}
 			break
 		}
 	}
 
 	return domains
+}
+
+func stripWildcards(domains map[string]struct{}) map[string]struct{} {
+	domainsStripped := map[string]struct{}{}
+	for domain := range domains {
+		domainsStripped[strings.TrimPrefix(domain, "*.")] = struct{}{}
+	}
+
+	return domainsStripped
 }
