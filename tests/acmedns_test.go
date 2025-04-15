@@ -145,11 +145,11 @@ var _ = Describe("AcmeDNS", func() {
 	})
 })
 
-func doAcmeDNSRequest(ctx context.Context, url, username, password string, data map[string]string) (statusCode int, resBody []byte) {
+func doAcmeDNSRequest(ctx context.Context, serverURL, username, password string, data map[string]string) (statusCode int, resBody []byte) {
 	body, err := json.Marshal(data)
 	Expect(err).ToNot(HaveOccurred())
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, serverURL, bytes.NewReader(body))
 	Expect(err).ToNot(HaveOccurred())
 	req.Header.Add("X-Api-User", username)
 	req.Header.Add("X-Api-Key", password)

@@ -129,11 +129,11 @@ var _ = Describe("HTTPReq", func() {
 	})
 })
 
-func doHTTPReqRequest(ctx context.Context, url, username, password string, data map[string]string) int {
+func doHTTPReqRequest(ctx context.Context, serverURL, username, password string, data map[string]string) int {
 	body, err := json.Marshal(data)
 	Expect(err).ToNot(HaveOccurred())
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, serverURL, bytes.NewReader(body))
 	Expect(err).ToNot(HaveOccurred())
 	req.Header.Add("Content-Type", "application/json")
 	req.SetBasicAuth(username, password)

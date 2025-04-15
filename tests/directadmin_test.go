@@ -230,8 +230,8 @@ var _ = Describe("DirectAdmin", func() {
 	})
 })
 
-func doDirectAdminRequest(ctx context.Context, url, username, password string, data url.Values) (statusCode int, resData string) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
+func doDirectAdminRequest(ctx context.Context, serverURL, username, password string, data url.Values) (statusCode int, resData string) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, serverURL, http.NoBody)
 	Expect(err).ToNot(HaveOccurred())
 	req.SetBasicAuth(username, password)
 	req.URL.RawQuery = data.Encode()
