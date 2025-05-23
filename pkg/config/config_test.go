@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
 )
@@ -16,9 +16,9 @@ import (
 var _ = Describe("AllowedDomains", func() {
 	const unexpectedPartsCountErr = "failed to parse allowed domain, length of parts != 2"
 
-	DescribeTable("should unmarshal text successfully", func(text string, expected func() config.AllowedDomains) {
+	DescribeTable("should read from string successfully", func(text string, expected func() config.AllowedDomains) {
 		allowedDomains := config.AllowedDomains{}
-		Expect(allowedDomains.UnmarshalText([]byte(text))).To(Succeed())
+		Expect(allowedDomains.FromString(text)).To(Succeed())
 		Expect(allowedDomains).To(Equal(expected()))
 	},
 		Entry("wildcard for localhost", "*,127.0.0.1/32",
@@ -80,9 +80,9 @@ var _ = Describe("AllowedDomains", func() {
 		),
 	)
 
-	DescribeTable("should fail unmarshal text on", func(text, expected string) {
+	DescribeTable("should to read fail from string on", func(text, expected string) {
 		allowedDomains := config.AllowedDomains{}
-		Expect(allowedDomains.UnmarshalText([]byte(text))).To(MatchError(expected))
+		Expect(allowedDomains.FromString(text)).To(MatchError(expected))
 		Expect(allowedDomains).To(BeEmpty())
 	},
 		Entry("empty", "", unexpectedPartsCountErr),
@@ -370,7 +370,7 @@ var _ = Describe("Config", func() {
 		It("should fail on invalid yaml", func() {
 			Expect(os.WriteFile(filePath, []byte("not yaml"), 0o600)).To(Succeed())
 			cfg, err := config.ReadFile(filePath)
-			Expect(err).To(MatchError(ContainSubstring("yaml: unmarshal errors:")))
+			Expect(err).To(MatchError(ContainSubstring("string was used where mapping is expected")))
 			Expect(cfg).To(BeNil())
 		})
 	})

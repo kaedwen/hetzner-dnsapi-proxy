@@ -8,14 +8,14 @@ import (
 	"strconv"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 type AllowedDomains map[string][]*net.IPNet
 
-func (out *AllowedDomains) UnmarshalText(text []byte) error {
+func (out *AllowedDomains) FromString(val string) error {
 	allowedDomains := AllowedDomains{}
-	for _, part := range strings.Split(string(text), ";") {
+	for _, part := range strings.Split(val, ";") {
 		parts := strings.Split(part, ",")
 
 		const expectedParts = 2
@@ -104,7 +104,7 @@ func ParseEnv() (*Config, error) {
 	}
 
 	if allowedDomains, ok := os.LookupEnv("ALLOWED_DOMAINS"); ok {
-		if err := cfg.Auth.AllowedDomains.UnmarshalText([]byte(allowedDomains)); err != nil {
+		if err := cfg.Auth.AllowedDomains.FromString(allowedDomains); err != nil {
 			return nil, fmt.Errorf("failed to parse ALLOWED_DOMAINS: %v", err)
 		}
 	} else {
