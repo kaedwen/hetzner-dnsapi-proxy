@@ -94,7 +94,7 @@ var _ = Describe("AcmeDNS", func() {
 		const subdomainTXTMissing = "subdomain or txt is missing\n"
 
 		AfterEach(func() {
-			Expect(api.ReceivedRequests()).To(HaveLen(0))
+			Expect(api.ReceivedRequests()).To(BeEmpty())
 		})
 
 		It("when subdomain is missing", func(ctx context.Context) {

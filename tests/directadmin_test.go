@@ -110,7 +110,7 @@ var _ = Describe("DirectAdmin", func() {
 
 	Context("should make no api calls and", func() {
 		AfterEach(func() {
-			Expect(api.ReceivedRequests()).To(HaveLen(0))
+			Expect(api.ReceivedRequests()).To(BeEmpty())
 		})
 
 		DescribeTable("should succeed on action action than add with", func(ctx context.Context, action string) {

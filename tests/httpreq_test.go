@@ -78,7 +78,7 @@ var _ = Describe("HTTPReq", func() {
 
 	Context("should make no api calls and", func() {
 		AfterEach(func() {
-			Expect(api.ReceivedRequests()).To(HaveLen(0))
+			Expect(api.ReceivedRequests()).To(BeEmpty())
 		})
 
 		It("should succeed cleaning up", func() {

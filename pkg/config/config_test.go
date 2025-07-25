@@ -104,7 +104,6 @@ var _ = Describe("Config", func() {
 		recordTTLStr      = "5000"
 		listenAddr        = "127.0.0.1:8080"
 		trustedProxiesStr = "127.0.0.1,192.168.0.1,192.168.0.2"
-		debug             = true
 		debugStr          = "true"
 	)
 
@@ -173,7 +172,7 @@ var _ = Describe("Config", func() {
 			Expect(cfg.RecordTTL).To(Equal(recordTTL))
 			Expect(cfg.ListenAddr).To(Equal(listenAddr))
 			Expect(cfg.TrustedProxies).To(Equal(trustedProxies))
-			Expect(cfg.Debug).To(Equal(debug))
+			Expect(cfg.Debug).To(BeTrue())
 		})
 
 		DescribeTable("should fail on invalid environment variables", func(setEnv func(), errMsg string) {
@@ -243,7 +242,7 @@ var _ = Describe("Config", func() {
 				RecordTTL:      recordTTL,
 				ListenAddr:     listenAddr,
 				TrustedProxies: trustedProxies,
-				Debug:          debug,
+				Debug:          true,
 			}
 
 			data, err := yaml.Marshal(cfg)
