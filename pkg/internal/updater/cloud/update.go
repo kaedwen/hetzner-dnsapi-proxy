@@ -13,18 +13,6 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
-const (
-	headerContentType     = "Content-Type"
-	applicationJSON       = "application/json"
-	applicationURLEncoded = "application/x-www-form-urlencoded"
-)
-
-const (
-	headerAuthAPIToken = "Auth-API-Token" //#nosec G101
-	requestTimeout     = 60
-	requestFailedFmt   = "%s request failed with status code %d"
-)
-
 type updater struct {
 	cfg    *config.Config
 	client *hcloud.Client
@@ -102,7 +90,12 @@ func (u *updater) getZone(ctx context.Context, zoneName string) (*hcloud.Zone, e
 	return zone, nil
 }
 
-func (u *updater) getRecord(ctx context.Context, zone *hcloud.Zone, recordName string, recordType hcloud.ZoneRRSetType) (*hcloud.ZoneRRSet, error) {
+func (u *updater) getRecord(
+	ctx context.Context,
+	zone *hcloud.Zone,
+	recordName string,
+	recordType hcloud.ZoneRRSetType,
+) (*hcloud.ZoneRRSet, error) {
 	record, _, err := u.client.Zone.GetRRSetByNameAndType(ctx, zone, recordName, recordType)
 	if err != nil {
 		return nil, err
@@ -111,6 +104,7 @@ func (u *updater) getRecord(ctx context.Context, zone *hcloud.Zone, recordName s
 	return record, nil
 }
 
+//nolint:gocyclo // reason: recordTypeFromString is simple enough
 func recordTypeFromString(recordType string) hcloud.ZoneRRSetType {
 	switch recordType {
 	case "A":

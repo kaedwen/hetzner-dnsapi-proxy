@@ -47,7 +47,7 @@ func New(cfg *config.Config) http.Handler {
 }
 
 func updater(cfg *config.Config) func(http.Handler) http.Handler {
-	if cfg.CloudApi {
+	if cfg.CloudAPI {
 		return cloud.NewUpdater(cfg)
 	}
 
