@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
-	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/middleware"
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/middleware"
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/updater/cloud"
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/updater/dns"
 )
 
 type loggingResponseWriter struct {
@@ -23,7 +25,7 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 
 func New(cfg *config.Config) http.Handler {
 	authorizer := middleware.NewAuthorizer(cfg)
-	updater := middleware.NewUpdater(cfg)
+	updater := updater(cfg)
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /plain/update",
@@ -42,6 +44,14 @@ func New(cfg *config.Config) http.Handler {
 		handle(cfg, middleware.BindDirectAdmin, authorizer, updater, middleware.StatusOkDirectAdmin))
 
 	return mux
+}
+
+func updater(cfg *config.Config) func(http.Handler) http.Handler {
+	if cfg.CloudApi {
+		return cloud.NewUpdater(cfg)
+	}
+
+	return dns.NewUpdater(cfg)
 }
 
 func handle(cfg *config.Config, handlers ...func(http.Handler) http.Handler) http.Handler {
