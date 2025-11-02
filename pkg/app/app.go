@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/handler/cleaner"
+	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/handler/updater"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/middleware"
-	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/updater/cloud"
-	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/updater/dns"
 )
 
 type loggingResponseWriter struct {
@@ -25,7 +25,8 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 
 func New(cfg *config.Config) http.Handler {
 	authorizer := middleware.NewAuthorizer(cfg)
-	updater := updater(cfg)
+	updater := updater.NewUpdater(cfg)
+	cleaner := cleaner.NewCleaner(cfg)
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /plain/update",
@@ -35,7 +36,7 @@ func New(cfg *config.Config) http.Handler {
 	mux.Handle("POST /httpreq/present",
 		handle(cfg, middleware.ContentTypeJSON, middleware.BindHTTPReq, authorizer, updater, middleware.StatusOk))
 	mux.Handle("POST /httpreq/cleanup",
-		handle(cfg, middleware.StatusOk))
+		handle(cfg, middleware.ContentTypeJSON, middleware.BindHTTPReq, authorizer, cleaner, middleware.StatusOk))
 	mux.Handle("GET /directadmin/CMD_API_SHOW_DOMAINS",
 		handle(cfg, middleware.NewShowDomainsDirectAdmin(cfg)))
 	mux.Handle("GET /directadmin/CMD_API_DOMAIN_POINTER",
@@ -44,14 +45,6 @@ func New(cfg *config.Config) http.Handler {
 		handle(cfg, middleware.BindDirectAdmin, authorizer, updater, middleware.StatusOkDirectAdmin))
 
 	return mux
-}
-
-func updater(cfg *config.Config) func(http.Handler) http.Handler {
-	if cfg.CloudAPI {
-		return cloud.NewUpdater(cfg)
-	}
-
-	return dns.NewUpdater(cfg)
 }
 
 func handle(cfg *config.Config, handlers ...func(http.Handler) http.Handler) http.Handler {

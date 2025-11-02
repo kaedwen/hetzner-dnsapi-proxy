@@ -113,8 +113,13 @@ func BindHTTPReq(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 
-		if data.FQDN == "" || data.Value == "" {
-			http.Error(w, "fqdn or value is missing", http.StatusBadRequest)
+		if data.FQDN == "" {
+			http.Error(w, "fqdn is missing", http.StatusBadRequest)
+			return
+		}
+
+		if r.URL.Path == "/httpreq/present" && data.Value == "" {
+			http.Error(w, "value is missing", http.StatusBadRequest)
 			return
 		}
 
