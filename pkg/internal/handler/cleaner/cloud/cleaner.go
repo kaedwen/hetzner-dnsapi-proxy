@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/model"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 type cleaner struct {
@@ -18,7 +19,7 @@ type cleaner struct {
 	m      sync.Mutex
 }
 
-func NewCleaner(cfg *config.Config) func(http.Handler) http.Handler {
+func New(cfg *config.Config) func(http.Handler) http.Handler {
 	u := &cleaner{
 		cfg:    cfg,
 		client: hcloud.NewClient(hcloud.WithToken(cfg.Token)),

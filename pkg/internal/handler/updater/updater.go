@@ -1,4 +1,4 @@
-package updater
+package update
 
 import (
 	"net/http"
@@ -8,10 +8,10 @@ import (
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/handler/updater/dns"
 )
 
-func NewUpdater(cfg *config.Config) func(http.Handler) http.Handler {
+func New(cfg *config.Config) func(http.Handler) http.Handler {
 	if cfg.CloudAPI {
-		return cloud.NewUpdater(cfg)
+		return cloud.New(cfg)
 	}
 
-	return dns.NewUpdater(cfg)
+	return dns.New(cfg)
 }

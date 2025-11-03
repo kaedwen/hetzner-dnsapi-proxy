@@ -1,4 +1,4 @@
-package middleware
+package dns
 
 import (
 	"bytes"
@@ -18,6 +18,11 @@ import (
 )
 
 const (
+	headerContentType = "Content-Type"
+	applicationJSON   = "application/json"
+)
+
+const (
 	headerAuthAPIToken = "Auth-API-Token" //#nosec G101
 	requestTimeout     = 60
 	requestFailedFmt   = "%s request failed with status code %d"
@@ -29,7 +34,7 @@ type updater struct {
 	m      sync.Mutex
 }
 
-func NewUpdater(cfg *config.Config) func(http.Handler) http.Handler {
+func New(cfg *config.Config) func(http.Handler) http.Handler {
 	u := &updater{
 		cfg: cfg,
 		client: http.Client{

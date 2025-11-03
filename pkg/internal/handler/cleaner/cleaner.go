@@ -1,4 +1,4 @@
-package cleaner
+package clean
 
 import (
 	"net/http"
@@ -8,10 +8,10 @@ import (
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/handler/cleaner/dns"
 )
 
-func NewCleaner(cfg *config.Config) func(http.Handler) http.Handler {
+func New(cfg *config.Config) func(http.Handler) http.Handler {
 	if cfg.CloudAPI {
-		return cloud.NewCleaner(cfg)
+		return cloud.New(cfg)
 	}
 
-	return dns.NewCleaner(cfg)
+	return dns.New(cfg)
 }

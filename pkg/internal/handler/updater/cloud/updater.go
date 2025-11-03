@@ -8,9 +8,10 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/model"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 type updater struct {
@@ -19,7 +20,7 @@ type updater struct {
 	m      sync.Mutex
 }
 
-func NewUpdater(cfg *config.Config) func(http.Handler) http.Handler {
+func New(cfg *config.Config) func(http.Handler) http.Handler {
 	u := &updater{
 		cfg:    cfg,
 		client: hcloud.NewClient(hcloud.WithToken(cfg.Token)),

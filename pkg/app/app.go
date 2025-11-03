@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/config"
-	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/handler/cleaner"
-	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/handler/updater"
+	hc "github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/handler/cleaner"
+	hu "github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/handler/updater"
 	"github.com/0xfelix/hetzner-dnsapi-proxy/pkg/internal/middleware"
 )
 
@@ -25,8 +25,8 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 
 func New(cfg *config.Config) http.Handler {
 	authorizer := middleware.NewAuthorizer(cfg)
-	updater := updater.NewUpdater(cfg)
-	cleaner := cleaner.NewCleaner(cfg)
+	updater := hu.New(cfg)
+	cleaner := hc.New(cfg)
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /plain/update",
